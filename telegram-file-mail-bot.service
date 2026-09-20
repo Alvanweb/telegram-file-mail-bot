@@ -4,17 +4,22 @@ After=network.target
 
 [Service]
 Type=simple
+
 User=telegrambot
 Group=telegrambot
+
 WorkingDirectory=/opt/telegram-file-mail-bot
-EnvironmentFile=-/opt/telegram-file-mail-bot/.env
+
+EnvironmentFile=/opt/telegram-file-mail-bot/.env
+
 ExecStart=/opt/telegram-file-mail-bot/venv/bin/python /opt/telegram-file-mail-bot/app.py
+
 Restart=always
 RestartSec=5
+
+# Security
 NoNewPrivileges=true
 PrivateTmp=true
-ProtectSystem=full
-ProtectHome=true
 
 [Install]
 WantedBy=multi-user.target
