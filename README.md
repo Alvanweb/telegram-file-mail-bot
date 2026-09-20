@@ -1,196 +1,512 @@
-# Telegram File Mail Bot
+# 📩 Telegram File Mail Bot
 
-A modular Telegram bot that collects a user's phone number, accepts an email subject and multiple files, and sends the files as email attachments through SMTP.
+A modular Telegram bot that allows registered users to send multiple files to a predefined email address directly through Telegram.
 
-The project also includes a lightweight Persian RTL web administration panel for users, file history, and runtime settings.
+The project includes a FastAPI-based web administration panel, SQLite database, SMTP email delivery, user management, file history, configurable settings, and bilingual English/Persian support.
 
-## Features
+## ✨ Features
 
-- Telegram phone-number registration
-- Email subject collection before upload
-- Multiple attachments in one email
-- Configurable total upload-size limit
-- Retry failed email delivery
-- Start a new upload batch after successful delivery
-- SQLite database
-- Persian RTL admin panel
-- User activation/deactivation
-- File delivery history
-- SMTP configuration from the admin panel
-- Configurable email metadata fields
-- Automatic cleanup of pending uploads
-- systemd deployment
-- Nginx reverse-proxy example
-- Telegram polling (no webhook required)
+* 📤 Send multiple files through Telegram
+* 📎 Multiple attachments in a single email
+* 📏 Configurable total file-size limit
+* 📝 Custom email subject
+* 📧 SMTP email delivery
+* 👤 Telegram user registration
+* 📱 Phone number registration
+* 🚫 Enable/disable users from the admin panel
+* 📂 File delivery history
+* 🔄 Retry failed email delivery
+* 🗑 Pending file management
+* 🖥️ FastAPI web administration panel
+* 🔐 Admin authentication
+* ⚙️ Configure application settings from the web panel
+* 🌐 English and Persian language support
+* 🇬🇧 English is the default language
+* 🇮🇷 Persian with RTL interface
+* 💾 SQLite database
+* 🚀 systemd service support
+* 🌐 Nginx reverse-proxy support
+* 🐧 Ubuntu VPS deployment
+* 🧩 Modular Python architecture
 
-## Project structure
+---
+
+## 🏗️ Architecture
+
+The project is organized into independent modules:
 
 ```text
 telegram-file-mail-bot/
+│
 ├── app.py
+├── i18n.py
+├── requirements.txt
+├── install.sh
+├── .env.example
+├── nginx.conf.example
+├── telegram-file-mail-bot.service
+│
 ├── bot/
+│   ├── app.py
+│   ├── cleanup.py
+│   ├── handlers.py
+│   └── helpers.py
+│
 ├── config/
+│   └── settings.py
+│
 ├── database/
+│   ├── core.py
+│   ├── files.py
+│   ├── pending.py
+│   ├── settings.py
+│   └── users.py
+│
 ├── mail/
+│   └── smtp.py
+│
 ├── web/
+│   ├── auth.py
+│   ├── dashboard.py
+│   ├── files.py
+│   ├── settings.py
+│   └── users.py
+│
 ├── templates/
 ├── static/
-├── storage/
-├── .env.example
-├── .gitignore
-├── install.sh
-├── nginx.conf.example
-├── requirements.txt
-├── telegram-file-mail-bot.service
-└── LICENSE
+└── storage/
 ```
+
+### Main components
+
+| Component    | Purpose                         |
+| ------------ | ------------------------------- |
+| `bot/`       | Telegram bot logic and handlers |
+| `database/`  | SQLite database operations      |
+| `mail/`      | SMTP email delivery             |
+| `web/`       | FastAPI administration panel    |
+| `templates/` | Web UI templates                |
+| `static/`    | CSS and JavaScript              |
+| `config/`    | Application configuration       |
+| `i18n.py`    | English/Persian translations    |
+
+---
+
+## 🌐 Languages
+
+The application supports:
+
+* 🇬🇧 English
+* 🇮🇷 Persian
+
+English is used by default.
+
+The language can be changed from:
+
+```text
+Admin Panel → Settings → Language
+```
+
+The selected language is stored in the database.
+
+When Persian is selected, the web interface uses RTL layout.
+
+---
+
+# 🚀 Installation
 
 ## Requirements
 
-- Ubuntu 22.04+ recommended
-- Python 3.10+
-- A Telegram bot token
-- An SMTP account/provider
-- Optional: Nginx for public web access
+Recommended environment:
 
-## Installation
+* Ubuntu 22.04 or newer
+* Python 3.11+
+* SQLite
+* Nginx (optional)
+* A Telegram Bot
+* An SMTP account
 
-Clone the repository:
+---
+
+## 1. Clone the repository
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/telegram-file-mail-bot.git
+git clone https://github.com/Alvanweb/telegram-file-mail-bot.git
 cd telegram-file-mail-bot
 ```
 
-Create the private environment file:
+---
 
-```bash
-cp .env.example .env
-nano .env
-```
-
-Set at least:
-
-```env
-BOT_TOKEN=YOUR_TELEGRAM_BOT_TOKEN
-ADMIN_USERNAME=admin
-ADMIN_PASSWORD=YOUR_STRONG_PASSWORD
-SESSION_SECRET=YOUR_LONG_RANDOM_SECRET
-```
-
-Then run:
+## 2. Run the installer
 
 ```bash
 chmod +x install.sh
 sudo ./install.sh
 ```
 
-The installer creates the `telegrambot` service account, Python virtual environment, installs dependencies, prepares storage, installs systemd, and starts the service.
+The installer prepares the Python environment and application dependencies.
 
-Check the service:
+---
+
+## 3. Configure environment variables
+
+Copy the example configuration:
 
 ```bash
-sudo systemctl status telegram-file-mail-bot --no-pager
+cp .env.example .env
 ```
 
-## Admin panel
+Edit it:
 
-By default the FastAPI application listens on:
+```bash
+nano .env
+```
+
+Example:
+
+```env
+BOT_TOKEN=YOUR_TELEGRAM_BOT_TOKEN
+
+ADMIN_USERNAME=admin
+ADMIN_PASSWORD=CHANGE_THIS_PASSWORD
+SESSION_SECRET=CHANGE_THIS_TO_A_RANDOM_SECRET
+
+DB_PATH=/opt/telegram-file-mail-bot/bot.db
+PANEL_HOST=127.0.0.1
+PANEL_PORT=8000
+```
+
+### Important
+
+Never commit `.env` to GitHub.
+
+The `.gitignore` file already excludes it.
+
+---
+
+# 🤖 Telegram Bot
+
+Create a Telegram bot using **BotFather** and obtain its token.
+
+Set the token in:
+
+```env
+BOT_TOKEN=YOUR_TELEGRAM_BOT_TOKEN
+```
+
+The bot uses Telegram polling and does not require a public webhook.
+
+---
+
+# 📧 SMTP Configuration
+
+SMTP configuration can be managed from the administration panel.
+
+Open:
 
 ```text
-127.0.0.1:8000
+Settings → SMTP
 ```
 
-Use Nginx if the panel needs to be reachable through a domain.
+For Gmail:
 
-An example configuration is provided in:
+```text
+SMTP Host: smtp.gmail.com
+SMTP Port: 587
+TLS: Enabled
+SMTP Username: your@gmail.com
+SMTP Password: Gmail App Password
+SMTP From: your@gmail.com
+```
+
+For Gmail, use an **App Password** instead of your normal Google account password.
+
+---
+
+# 🖥️ Administration Panel
+
+The application provides a FastAPI administration panel.
+
+The default local address is:
+
+```text
+http://127.0.0.1:8000
+```
+
+The panel provides:
+
+### Dashboard
+
+* Total users
+* Active users
+* File statistics
+* Delivery statistics
+
+### Users
+
+* View registered users
+* View Telegram information
+* Enable/disable users
+* Remove users
+
+### Files
+
+* View uploaded files
+* View delivery status
+* View errors
+* View file history
+
+### Settings
+
+* Language
+* SMTP configuration
+* Email recipients
+* File-size limits
+* Retention settings
+* Other application settings
+
+---
+
+# 🔐 Security
+
+Do not publish or commit:
+
+```text
+.env
+bot.db
+*.backup
+SMTP passwords
+Telegram bot tokens
+Session secrets
+Admin passwords
+```
+
+The repository includes a `.gitignore` configured to exclude sensitive runtime files.
+
+If a Telegram bot token or SMTP credential is accidentally exposed, revoke/rotate it immediately.
+
+---
+
+# 🌐 Nginx
+
+An example Nginx configuration is included:
 
 ```text
 nginx.conf.example
 ```
 
-## SMTP configuration
-
-SMTP credentials, recipients, upload limits, retention, and email metadata settings are stored in SQLite and can be changed from:
+The recommended architecture is:
 
 ```text
-/settings
+Internet
+   │
+   ▼
+ Nginx
+   │
+   ▼
+FastAPI :8000
 ```
 
-The default SMTP configuration is intended as a starting point only. Configure the provider you actually use.
+Telegram polling runs independently:
 
-For Gmail SMTP, use an App Password rather than your normal Google account password.
-
-## Database
-
-The application creates `bot.db` automatically on first start.
-
-The database contains:
-
-- registered Telegram users
-- file history
-- pending uploads
-- application settings
-
-Do not commit `bot.db` to a public repository.
-
-## Security
-
-Never commit:
-
-- `.env`
-- `bot.db`
-- SMTP passwords
-- Telegram bot tokens
-- admin passwords
-- session secrets
-- uploaded files
-- server-specific backups
-
-If a Telegram bot token or SMTP credential is ever exposed, revoke/rotate it immediately.
-
-## Backup
-
-For a private deployment, back up both the database and environment configuration.
-
-Example:
-
-```bash
-sudo cp /opt/telegram-file-mail-bot/.env /root/telegram-file-mail-bot.env.backup
-sudo cp /opt/telegram-file-mail-bot/bot.db /root/telegram-file-mail-bot.db.backup
+```text
+Telegram
+   │
+   ▼
+Telegram Bot
+   │
+   ▼
+Application
 ```
 
-Keep these backups private.
+---
 
-## systemd
+# ⚙️ systemd
 
-The included service file is:
+A systemd service file is included:
 
 ```text
 telegram-file-mail-bot.service
 ```
 
-Useful commands:
+After installation:
 
 ```bash
+sudo systemctl daemon-reload
 sudo systemctl enable telegram-file-mail-bot
 sudo systemctl start telegram-file-mail-bot
-sudo systemctl restart telegram-file-mail-bot
-sudo systemctl status telegram-file-mail-bot --no-pager
-sudo journalctl -u telegram-file-mail-bot -n 100 --no-pager
 ```
 
-## License
+Check status:
 
-MIT License. See `LICENSE`.
+```bash
+sudo systemctl status telegram-file-mail-bot
+```
 
-## 🌐 Localization
+View logs:
 
-The project supports two languages:
+```bash
+sudo journalctl -u telegram-file-mail-bot -f
+```
 
-- **English** — default
-- **فارسی (Persian)** — RTL
+The service is configured to restart automatically if the application stops unexpectedly.
 
-The language can be changed from **Settings → Language** in the admin panel. The selected language is stored in SQLite and is used by both the web panel and Telegram bot messages.
+---
 
-No environment variable is required for the language setting.
+# 💾 Database
+
+The project uses SQLite.
+
+The database contains application data such as:
+
+* Telegram users
+* User registration information
+* File history
+* Pending uploads
+* Application settings
+* Language preference
+
+The production database should not be committed to GitHub.
+
+A new installation creates its own database.
+
+---
+
+# 📦 File Upload Flow
+
+The normal user flow is:
+
+```text
+Start
+  │
+  ▼
+User Registration
+  │
+  ▼
+Enter Email Subject
+  │
+  ▼
+Upload Files
+  │
+  ▼
+Check Total Size
+  │
+  ▼
+Review Files
+  │
+  ▼
+Send Email
+  │
+  ▼
+Email Delivered
+```
+
+Multiple files are attached to the same email.
+
+---
+
+# 🔄 Failed Delivery
+
+If email delivery fails, the uploaded files remain available for retry according to the application's retention and cleanup settings.
+
+Users can retry sending the email from Telegram.
+
+---
+
+# 🛠️ Development
+
+Create a virtual environment:
+
+```bash
+python3 -m venv venv
+source venv/bin/activate
+```
+
+Install dependencies:
+
+```bash
+pip install -r requirements.txt
+```
+
+Run the application:
+
+```bash
+python app.py
+```
+
+---
+
+# 📁 Project Data
+
+Runtime data should remain outside the public source history.
+
+Typical production files include:
+
+```text
+.env
+bot.db
+storage/pending_uploads/
+```
+
+These files are intentionally excluded from Git.
+
+---
+
+# 🐛 Troubleshooting
+
+### Check service status
+
+```bash
+systemctl status telegram-file-mail-bot
+```
+
+### View application logs
+
+```bash
+journalctl -u telegram-file-mail-bot -n 100 --no-pager
+```
+
+### Restart the service
+
+```bash
+systemctl restart telegram-file-mail-bot
+```
+
+### Check Python dependencies
+
+```bash
+source venv/bin/activate
+pip install -r requirements.txt
+```
+
+### Check whether port 8000 is listening
+
+```bash
+ss -lntp | grep 8000
+```
+
+---
+
+# 📜 License
+
+This project is licensed under the MIT License.
+
+See [`LICENSE`](LICENSE) for details.
+
+---
+
+# 👨‍💻 Author
+
+Developed by **MOЯ**
+
+GitHub:
+
+https://github.com/Alvanweb
+
+---
+
+# ⭐ Support
+
+If you find this project useful, consider giving it a ⭐ on GitHub.
+
+Contributions, bug reports, and feature requests are welcome.
