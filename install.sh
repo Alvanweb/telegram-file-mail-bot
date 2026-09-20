@@ -1,9 +1,14 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-APP_DIR="${APP_DIR:-/opt/telegram-file-mail-bot}"
+# Telegram File Mail Bot Installer
+
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+APP_DIR="${APP_DIR:-${SCRIPT_DIR}}"
+
 SERVICE_USER="${SERVICE_USER:-telegrambot}"
 SERVICE_NAME="telegram-file-mail-bot"
+SERVICE_FILE="/etc/systemd/system/${SERVICE_NAME}.service"
 
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
@@ -22,11 +27,6 @@ error() {
     echo -e "${RED}[ERROR]${NC} $1"
 }
 
-if [[ "${EUID}" -ne 0 ]]; then
-    error "Please run this installer as root or with sudo."
-    exit 1
-fi
-
 echo
 echo "=========================================="
 echo " Telegram File Mail Bot - Installer"
@@ -34,7 +34,45 @@ echo "=========================================="
 echo
 
 # --------------------------------------------------
-# Check operating system
+# Root check
+# --------------------------------------------------
+
+if [[ "${EUID}" -ne 0 ]]; then
+    error "Please run this installer as root or with sudo."
+    exit 1
+fi
+
+# --------------------------------------------------
+# Application directory
+# --------------------------------------------------
+
+info "Application directory:"
+echo "  ${APP_DIR}"
+echo
+
+if [[ ! -f "${APP_DIR}/app.py" ]]; then
+    error "Application files were not found:"
+    echo "  ${APP_DIR}"
+    echo
+    echo "Clone the repository first:"
+    echo "  git clone https://github.com/Alvanweb/telegram-file-mail-bot.git"
+    echo "  cd telegram-file-mail-bot"
+    echo "  sudo ./install.sh"
+    exit 1
+fi
+
+if [[ ! -f "${APP_DIR}/requirements.txt" ]]; then
+    error "requirements.txt was not found."
+    exit 1
+fi
+
+if [[ ! -f "${APP_DIR}/telegram-file-mail-bot.service" ]]; then
+    error "telegram-file-mail-bot.service was not found."
+    exit 1
+fi
+
+# --------------------------------------------------
+# Operating system
 # --------------------------------------------------
 
 if [[ ! -f /etc/os-release ]]; then
@@ -48,29 +86,6 @@ if [[ "${ID:-}" != "ubuntu" ]]; then
     warn "This installer is primarily tested on Ubuntu."
     warn "Detected OS: ${PRETTY_NAME:-unknown}"
     echo
-fi
-
-# --------------------------------------------------
-# Check project files
-# --------------------------------------------------
-
-if [[ ! -f "${APP_DIR}/app.py" ]]; then
-    error "Application files were not found:"
-    echo "  ${APP_DIR}"
-    echo
-    echo "Clone the repository first:"
-    echo "  git clone https://github.com/Alvanweb/telegram-file-mail-bot.git ${APP_DIR}"
-    exit 1
-fi
-
-if [[ ! -f "${APP_DIR}/requirements.txt" ]]; then
-    error "requirements.txt was not found."
-    exit 1
-fi
-
-if [[ ! -f "${APP_DIR}/telegram-file-mail-bot.service" ]]; then
-    error "telegram-file-mail-bot.service was not found."
-    exit 1
 fi
 
 # --------------------------------------------------
@@ -92,10 +107,11 @@ apt-get install -y \
     ca-certificates
 
 # --------------------------------------------------
-# Check Python
+# Python version
 # --------------------------------------------------
 
-PYTHON_VERSION=$(python3 -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")')
+PYTHON_VERSION=$(python3 -c \
+'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")')
 
 info "Detected Python ${PYTHON_VERSION}"
 
@@ -108,7 +124,7 @@ if (( PYTHON_MAJOR < 3 || (PYTHON_MAJOR == 3 && PYTHON_MINOR < 11) )); then
 fi
 
 # --------------------------------------------------
-# Create service user
+# Service user
 # --------------------------------------------------
 
 if id -u "${SERVICE_USER}" >/dev/null 2>&1; then
@@ -124,7 +140,7 @@ else
 fi
 
 # --------------------------------------------------
-# Create virtual environment
+# Virtual environment
 # --------------------------------------------------
 
 if [[ -d "${APP_DIR}/venv" ]]; then
@@ -136,7 +152,7 @@ else
 fi
 
 # --------------------------------------------------
-# Install Python dependencies
+# Python dependencies
 # --------------------------------------------------
 
 info "Installing Python dependencies..."
@@ -147,7 +163,7 @@ info "Installing Python dependencies..."
     -r "${APP_DIR}/requirements.txt"
 
 # --------------------------------------------------
-# Create runtime directories
+# Runtime directories
 # --------------------------------------------------
 
 info "Creating runtime directories..."
@@ -157,7 +173,7 @@ mkdir -p \
     "${APP_DIR}/storage/pending_uploads"
 
 # --------------------------------------------------
-# Create .env
+# Environment file
 # --------------------------------------------------
 
 if [[ -f "${APP_DIR}/.env" ]]; then
@@ -176,28 +192,29 @@ else
 fi
 
 # --------------------------------------------------
-# Set ownership and permissions
+# Permissions
 # --------------------------------------------------
 
-info "Setting file permissions..."
+info "Setting application permissions..."
 
 chown -R "${SERVICE_USER}:${SERVICE_USER}" "${APP_DIR}"
 
 chmod 600 "${APP_DIR}/.env"
 
-# Make installer executable if needed
-chmod +x "${APP_DIR}/install.sh" 2>/dev/null || true
-
 # --------------------------------------------------
-# Install systemd service
+# Generate systemd service
 # --------------------------------------------------
 
 info "Installing systemd service..."
 
-install \
-    -m 0644 \
+sed \
+    -e "s|/opt/telegram-file-mail-bot|${APP_DIR}|g" \
+    -e "s|User=telegrambot|User=${SERVICE_USER}|g" \
+    -e "s|Group=telegrambot|Group=${SERVICE_USER}|g" \
     "${APP_DIR}/telegram-file-mail-bot.service" \
-    "/etc/systemd/system/${SERVICE_NAME}.service"
+    > "${SERVICE_FILE}"
+
+chmod 0644 "${SERVICE_FILE}"
 
 systemctl daemon-reload
 
@@ -221,23 +238,20 @@ echo
 echo "Application directory:"
 echo "  ${APP_DIR}"
 echo
+echo "Service:"
+echo "  ${SERVICE_NAME}"
+echo
 echo "Next steps:"
 echo
-echo "1. Edit configuration:"
+echo "1. Configure the environment:"
 echo "   nano ${APP_DIR}/.env"
 echo
-echo "2. Set at least:"
-echo "   BOT_TOKEN"
-echo "   ADMIN_USERNAME"
-echo "   ADMIN_PASSWORD"
-echo "   SESSION_SECRET"
-echo
-echo "3. Start the application:"
+echo "2. Start the application:"
 echo "   systemctl start ${SERVICE_NAME}"
 echo
-echo "4. Check status:"
+echo "3. Check status:"
 echo "   systemctl status ${SERVICE_NAME} --no-pager"
 echo
-echo "5. View logs:"
+echo "4. View logs:"
 echo "   journalctl -u ${SERVICE_NAME} -f"
 echo
