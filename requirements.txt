@@ -4,3 +4,4 @@ python-dotenv
 python-multipart
 python-telegram-bot
 jinja2
+itsdangerous
