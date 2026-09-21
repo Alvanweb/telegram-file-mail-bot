@@ -1,1 +1,483 @@
-<!doctype html><html lang="{{ lang }}" dir="{{ dir }}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>{{ t('settings') }} | File Mail</title><link rel="stylesheet" href="/static/style.css"></head><body><div class="app"><aside class="sidebar"><div class="brand"><div class="brand-mark">✉</div><div><strong>File Mail</strong><small>{{ t('bot_management') }}</small></div></div><nav><a href="/">◈ <span>{{ t('dashboard') }}</span></a><a href="/users">♙ <span>{{ t('users') }}</span></a><a href="/files">▣ <span>{{ t('files') }}</span></a><a class="active" href="/settings">⚙ <span>{{ t('settings') }}</span></a></nav><a class="logout" href="/logout">↪ <span>{{ t('logout') }}</span></a></aside><main class="main"><header class="topbar"><div><div class="eyebrow">{{ t('configuration') }}</div><h1>{{ t('settings') }}</h1><p class="muted">{{ t('smtp_settings') }}</p></div></header>{% if message %}<div class="notice success-notice">{{ message }}</div>{% endif %}{% if error %}<div class="notice error-notice">{{ error }}</div>{% endif %}<form method="post" action="/settings"><section class="panel settings-panel"><div class="panel-head"><h2>🌐 {{ t('lang') }}</h2><p>{{ t('language_hint') }}</p></div><div class="settings-grid"><label>{{ t('lang') }}<select name="language">{% for code,name in languages.items() %}<option value="{{ code }}" {% if code == selected_language %}selected{% endif %}>{{ name }}</option>{% endfor %}</select></label></div></section><section class="panel settings-panel"><div class="panel-head"><h2>✉️ {{ t('smtp_settings') }}</h2><p>{{ t('smtp_hint') }}</p></div><div class="settings-grid"><label>{{ t('smtp_host') }}<input name="smtp_host" value="{{ smtp.host }}"></label><label>{{ t('smtp_port') }}<input type="number" name="smtp_port" value="{{ smtp.port }}"></label><label>{{ t('smtp_username') }}<input name="smtp_user" value="{{ smtp.user }}"></label><label>{{ t('smtp_password') }}<input type="password" name="smtp_password" placeholder="{{ t('smtp_password_hint') }}"></label><label>{{ t('smtp_from') }}<input name="smtp_from" value="{{ smtp.from }}"></label><label class="full">{{ t('recipients') }} <span class="hint">{{ t('one_per_line') }}</span><textarea name="smtp_recipients" rows="5">{{ smtp.recipients }}</textarea></label><label class="check"><input type="checkbox" name="smtp_use_tls" value="true" {% if smtp.use_tls %}checked{% endif %}> {{ t('use_tls') }}</label></div></section><section class="panel settings-panel"><div class="panel-head"><h2>📦 {{ t('file_management') }}</h2><p>{{ t('file_management_hint') }}</p></div><div class="settings-grid"><label>{{ t('max_total') }}<input type="number" min="1" max="100" name="max_total_mb_value" value="{{ max_total_mb }}"></label><label>{{ t('retention') }}<input type="number" min="1" max="720" name="retention_hours" value="{{ retention }}"></label></div></section><section class="panel settings-panel"><div class="panel-head"><h2>🧾 {{ t('email_content') }}</h2><p>{{ t('email_content_hint') }}</p></div><div class="checkbox-grid">{% for key,label_key in fields %}<label class="field-check"><input type="checkbox" name="email_fields" value="{{ key }}" {% if key in selected_fields %}checked{% endif %}> {{ t(label_key) }}</label>{% endfor %}</div></section><div class="settings-actions"><button class="btn primary" type="submit">💾 {{ t('save_settings') }}</button></form><form method="post" action="/settings/test-smtp"><button class="btn" type="submit">✉️ {{ t('test_smtp') }}</button></form></div></main></div></body></html>
+<!doctype html>
+<html lang="{{ lang }}" dir="{{ dir }}">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+
+    <title>{{ t('settings') }} | File Mail</title>
+
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+
+<body>
+
+<div class="app">
+
+    <!-- =====================================================
+         SIDEBAR
+         ===================================================== -->
+
+    <aside class="sidebar">
+
+        <div class="brand">
+
+            <div class="brand-mark">✉</div>
+
+            <div>
+                <strong>File Mail</strong>
+                <small>{{ t('bot_management') }}</small>
+            </div>
+
+        </div>
+
+        <nav>
+
+            <a href="/">
+                ◈
+                <span>{{ t('dashboard') }}</span>
+            </a>
+
+            <a href="/users">
+                ♙
+                <span>{{ t('users') }}</span>
+            </a>
+
+            <a href="/files">
+                ▣
+                <span>{{ t('files') }}</span>
+            </a>
+
+            <a class="active" href="/settings">
+                ⚙
+                <span>{{ t('settings') }}</span>
+            </a>
+
+        </nav>
+
+        <a class="logout" href="/logout">
+            ↪
+            <span>{{ t('logout') }}</span>
+        </a>
+
+    </aside>
+
+
+    <!-- =====================================================
+         MAIN
+         ===================================================== -->
+
+    <main class="main">
+
+        <!-- Header -->
+
+        <header class="topbar">
+
+            <div>
+
+                <div class="eyebrow">
+                    {{ t('configuration') }}
+                </div>
+
+                <h1>
+                    {{ t('settings') }}
+                </h1>
+
+                <p class="muted">
+                    {{ t('smtp_settings') }}
+                </p>
+
+            </div>
+
+        </header>
+
+
+        <!-- =================================================
+             SUCCESS / ERROR MESSAGES
+             ================================================= -->
+
+        {% if message %}
+
+        <div class="notice success-notice">
+            {{ message }}
+        </div>
+
+        {% endif %}
+
+
+        {% if error %}
+
+        <div class="notice error-notice">
+            {{ error }}
+        </div>
+
+        {% endif %}
+
+
+        <!-- =================================================
+             LANGUAGE SETTINGS
+             ================================================= -->
+
+        <form method="post" action="/settings/language">
+
+            <section class="panel settings-panel">
+
+                <div class="panel-head">
+
+                    <h2>
+                        🌐 {{ t('lang') }}
+                    </h2>
+
+                    <p>
+                        {{ t('language_hint') }}
+                    </p>
+
+                </div>
+
+
+                <div class="settings-grid">
+
+                    <label>
+
+                        {{ t('lang') }}
+
+                        <select name="language">
+
+                            {% for code, name in languages.items() %}
+
+                            <option
+                                value="{{ code }}"
+                                {% if code == selected_language %}selected{% endif %}
+                            >
+                                {{ name }}
+                            </option>
+
+                            {% endfor %}
+
+                        </select>
+
+                    </label>
+
+                </div>
+
+
+                <!-- Language save button -->
+
+                <div class="settings-actions">
+
+                    <button
+                        class="btn primary"
+                        type="submit"
+                    >
+                        💾 {{ t('save_language') }}
+                    </button>
+
+                </div>
+
+            </section>
+
+        </form>
+
+
+        <!-- =================================================
+             SMTP + OTHER SETTINGS
+             ================================================= -->
+
+        <form method="post" action="/settings">
+
+
+            <!-- =================================================
+                 SMTP SETTINGS
+                 ================================================= -->
+
+            <section class="panel settings-panel">
+
+                <div class="panel-head">
+
+                    <h2>
+                        ✉️ {{ t('smtp_settings') }}
+                    </h2>
+
+                    <p>
+                        {{ t('smtp_hint') }}
+                    </p>
+
+                </div>
+
+
+                <div class="settings-grid">
+
+
+                    <!-- SMTP Host -->
+
+                    <label>
+
+                        {{ t('smtp_host') }}
+
+                        <input
+                            type="text"
+                            name="smtp_host"
+                            value="{{ smtp.host }}"
+                            autocomplete="off"
+                        >
+
+                    </label>
+
+
+                    <!-- SMTP Port -->
+
+                    <label>
+
+                        {{ t('smtp_port') }}
+
+                        <input
+                            type="number"
+                            name="smtp_port"
+                            value="{{ smtp.port }}"
+                            min="1"
+                            max="65535"
+                        >
+
+                    </label>
+
+
+                    <!-- SMTP Username -->
+
+                    <label>
+
+                        {{ t('smtp_username') }}
+
+                        <input
+                            type="text"
+                            name="smtp_user"
+                            value="{{ smtp.user }}"
+                            autocomplete="username"
+                        >
+
+                    </label>
+
+
+                    <!-- SMTP Password -->
+
+                    <label>
+
+                        {{ t('smtp_password') }}
+
+                        <input
+                            type="password"
+                            name="smtp_password"
+                            placeholder="{{ t('smtp_password_hint') }}"
+                            autocomplete="new-password"
+                        >
+
+                    </label>
+
+
+                    <!-- SMTP From -->
+
+                    <label>
+
+                        {{ t('smtp_from') }}
+
+                        <input
+                            type="email"
+                            name="smtp_from"
+                            value="{{ smtp.from }}"
+                            autocomplete="email"
+                        >
+
+                    </label>
+
+
+                    <!-- Recipients -->
+
+                    <label class="full">
+
+                        {{ t('recipients') }}
+
+                        <span class="hint">
+                            {{ t('one_per_line') }}
+                        </span>
+
+                        <textarea
+                            name="smtp_recipients"
+                            rows="5"
+                        >{{ smtp.recipients }}</textarea>
+
+                    </label>
+
+
+                    <!-- TLS -->
+
+                    <label class="check">
+
+                        <input
+                            type="checkbox"
+                            name="smtp_use_tls"
+                            value="true"
+                            {% if smtp.use_tls %}checked{% endif %}
+                        >
+
+                        {{ t('use_tls') }}
+
+                    </label>
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
+                 FILE MANAGEMENT
+                 ================================================= -->
+
+            <section class="panel settings-panel">
+
+                <div class="panel-head">
+
+                    <h2>
+                        📦 {{ t('file_management') }}
+                    </h2>
+
+                    <p>
+                        {{ t('file_management_hint') }}
+                    </p>
+
+                </div>
+
+
+                <div class="settings-grid">
+
+
+                    <!-- Maximum total file size -->
+
+                    <label>
+
+                        {{ t('max_total') }}
+
+                        <input
+                            type="number"
+                            min="1"
+                            max="100"
+                            name="max_total_mb_value"
+                            value="{{ max_total_mb }}"
+                        >
+
+                    </label>
+
+
+                    <!-- File retention -->
+
+                    <label>
+
+                        {{ t('retention') }}
+
+                        <input
+                            type="number"
+                            min="1"
+                            max="720"
+                            name="retention_hours"
+                            value="{{ retention }}"
+                        >
+
+                    </label>
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
+                 EMAIL CONTENT
+                 ================================================= -->
+
+            <section class="panel settings-panel">
+
+                <div class="panel-head">
+
+                    <h2>
+                        🧾 {{ t('email_content') }}
+                    </h2>
+
+                    <p>
+                        {{ t('email_content_hint') }}
+                    </p>
+
+                </div>
+
+
+                <div class="checkbox-grid">
+
+                    {% for key, label_key in fields %}
+
+                    <label class="field-check">
+
+                        <input
+                            type="checkbox"
+                            name="email_fields"
+                            value="{{ key }}"
+                            {% if key in selected_fields %}checked{% endif %}
+                        >
+
+                        {{ t(label_key) }}
+
+                    </label>
+
+                    {% endfor %}
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
+                 SAVE MAIN SETTINGS
+                 ================================================= -->
+
+            <div class="settings-actions">
+
+                <button
+                    class="btn primary"
+                    type="submit"
+                >
+                    💾 {{ t('save_settings') }}
+                </button>
+
+            </div>
+
+        </form>
+
+
+        <!-- =================================================
+             TEST SMTP
+             ================================================= -->
+
+        <div class="settings-actions">
+
+            <form
+                method="post"
+                action="/settings/test-smtp"
+            >
+
+                <button
+                    class="btn warning-btn"
+                    type="submit"
+                >
+                    ✉️ {{ t('test_smtp') }}
+                </button>
+
+            </form>
+
+        </div>
+
+
+    </main>
+
+</div>
+
+
+<script src="/static/app.js"></script>
+
+</body>
+
+</html>
