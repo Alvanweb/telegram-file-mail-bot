@@ -45,6 +45,8 @@ telegram-file-mail-bot/
 ├── .env.example
 ├── nginx.conf.example
 ├── telegram-file-mail-bot.service
+├── LICENSE
+├── README.md
 │
 ├── bot/
 │   ├── app.py
@@ -92,14 +94,14 @@ telegram-file-mail-bot/
 
 ---
 
-## 🌐 Languages
+# 🌐 Languages
 
 The application supports:
 
 * 🇬🇧 English
 * 🇮🇷 Persian
 
-English is used by default.
+English is the default language.
 
 The language can be changed from:
 
@@ -110,6 +112,8 @@ Admin Panel → Settings → Language
 The selected language is stored in the database.
 
 When Persian is selected, the web interface uses RTL layout.
+
+When English is selected, the web interface uses LTR layout.
 
 ---
 
@@ -122,7 +126,7 @@ Recommended environment:
 * Ubuntu 22.04 or newer
 * Python 3.11+
 * SQLite
-* Nginx (optional)
+* Nginx for production
 * A Telegram Bot
 * An SMTP account
 
@@ -131,7 +135,20 @@ Recommended environment:
 ## 1. Clone the repository
 
 ```bash
+cd /opt
+
 git clone https://github.com/Alvanweb/telegram-file-mail-bot.git
+
+cd telegram-file-mail-bot
+```
+
+You can also install a specific release:
+
+```bash
+git clone --branch v1.0.2 --depth 1 \
+https://github.com/Alvanweb/telegram-file-mail-bot.git \
+telegram-file-mail-bot
+
 cd telegram-file-mail-bot
 ```
 
@@ -139,39 +156,88 @@ cd telegram-file-mail-bot
 
 ## 2. Run the installer
 
+Make the installer executable:
+
 ```bash
 chmod +x install.sh
+```
+
+Run:
+
+```bash
 sudo ./install.sh
 ```
 
-The installer prepares the Python environment and application dependencies.
+The installer will:
+
+* Check that it is running as root
+* Check the application files
+* Install required Ubuntu packages
+* Verify Python 3.11+
+* Create the `telegrambot` service user
+* Create the Python virtual environment
+* Install Python dependencies
+* Create runtime directories
+* Create `.env` from `.env.example`
+* Set secure file permissions
+* Install the systemd service
+* Enable the systemd service
+
+### Application directory
+
+The default application directory is:
+
+```text
+/opt/telegram-file-mail-bot
+```
+
+The installer is designed to install the application into this directory even when the repository was cloned from another location.
+
+For example, cloning from `/root` is supported:
+
+```bash
+cd /root
+
+git clone https://github.com/Alvanweb/telegram-file-mail-bot.git
+
+cd telegram-file-mail-bot
+
+chmod +x install.sh
+
+sudo ./install.sh
+```
+
+The application will still be installed under:
+
+```text
+/opt/telegram-file-mail-bot
+```
 
 ---
 
-## 3. Configure environment variables
+# ⚙️ Configuration
 
-Copy the example configuration:
-
-```bash
-cp .env.example .env
-```
-
-Edit it:
+After installation, edit:
 
 ```bash
-nano .env
+nano /opt/telegram-file-mail-bot/.env
 ```
 
 Example:
 
 ```env
+# Telegram
 BOT_TOKEN=YOUR_TELEGRAM_BOT_TOKEN
 
+# Admin
 ADMIN_USERNAME=admin
 ADMIN_PASSWORD=CHANGE_THIS_PASSWORD
 SESSION_SECRET=CHANGE_THIS_TO_A_RANDOM_SECRET
 
+# Database
 DB_PATH=/opt/telegram-file-mail-bot/bot.db
+
+# Web panel
 PANEL_HOST=127.0.0.1
 PANEL_PORT=8000
 ```
@@ -180,13 +246,24 @@ PANEL_PORT=8000
 
 Never commit `.env` to GitHub.
 
-The `.gitignore` file already excludes it.
+The repository includes a `.gitignore` that excludes:
+
+```text
+.env
+*.db
+*.sqlite
+*.sqlite3
+venv/
+.venv/
+__pycache__/
+*.log
+```
 
 ---
 
 # 🤖 Telegram Bot
 
-Create a Telegram bot using **BotFather** and obtain its token.
+Create a Telegram bot using BotFather and obtain its token.
 
 Set the token in:
 
@@ -205,7 +282,7 @@ SMTP configuration can be managed from the administration panel.
 Open:
 
 ```text
-Settings → SMTP
+Admin Panel → Settings → SMTP
 ```
 
 For Gmail:
@@ -219,7 +296,9 @@ SMTP Password: Gmail App Password
 SMTP From: your@gmail.com
 ```
 
-For Gmail, use an **App Password** instead of your normal Google account password.
+For Gmail, use an App Password instead of your normal Google account password.
+
+The application can also be configured with other SMTP providers such as Brevo or compatible SMTP relay services.
 
 ---
 
@@ -227,49 +306,171 @@ For Gmail, use an **App Password** instead of your normal Google account passwor
 
 The application provides a FastAPI administration panel.
 
-The default local address is:
+## Default configuration
+
+The production-safe default is:
+
+```env
+PANEL_HOST=127.0.0.1
+PANEL_PORT=8000
+```
+
+This means the FastAPI panel is accessible only from the local server.
+
+Default local address:
 
 ```text
 http://127.0.0.1:8000
 ```
 
-The panel provides:
+For production, use Nginx as a reverse proxy and expose the panel through HTTPS.
 
-### Dashboard
+---
+
+## Temporary direct-access testing
+
+For testing without Nginx, you can temporarily change `.env`:
+
+```env
+PANEL_HOST=0.0.0.0
+PANEL_PORT=8880
+```
+
+Then restart:
+
+```bash
+systemctl restart telegram-file-mail-bot
+```
+
+The panel can then be accessed through:
+
+```text
+http://SERVER_IP:8880
+```
+
+### Security note
+
+Do not use `0.0.0.0` as the normal production configuration unless you intentionally want the FastAPI application directly exposed.
+
+For production, use:
+
+```env
+PANEL_HOST=127.0.0.1
+PANEL_PORT=8000
+```
+
+with Nginx in front of the application.
+
+---
+
+# 📊 Dashboard
+
+The dashboard provides:
 
 * Total users
 * Active users
 * File statistics
 * Delivery statistics
+* Application status
 
-### Users
+---
 
-* View registered users
-* View Telegram information
+# 👤 Users
+
+The Users section provides:
+
+* Registered users
+* Telegram username
+* Telegram ID
+* Phone number
+* Registration information
 * Enable/disable users
-* Remove users
+* Delete users
 
-### Files
+---
 
-* View uploaded files
-* View delivery status
-* View errors
-* View file history
+# 📂 Files
 
-### Settings
+The Files section provides:
 
-* Language
-* SMTP configuration
-* Email recipients
-* File-size limits
-* Retention settings
-* Other application settings
+* Uploaded file history
+* File names
+* File sizes
+* Email subjects
+* Delivery status
+* Error information
+* Pending file management
+
+---
+
+# ⚙️ Settings
+
+The Settings section provides:
+
+* 🌐 Language selection
+* 📧 SMTP configuration
+* 📬 Email recipients
+* 📦 Total file-size limit
+* 🧹 Pending file retention
+* 🧾 Email content fields
+* ✉️ SMTP connection testing
+
+---
+
+# 🌐 Nginx / Production
+
+For production deployments, the recommended architecture is:
+
+```text
+                    Internet
+                       │
+                       ▼
+                 ┌───────────┐
+                 │   Nginx   │
+                 │   :443    │
+                 └─────┬─────┘
+                       │
+                       ▼
+              127.0.0.1:8000
+                       │
+                       ▼
+                 ┌───────────┐
+                 │ FastAPI   │
+                 │ Web Panel │
+                 └───────────┘
+```
+
+The Telegram bot runs independently:
+
+```text
+Telegram
+   │
+   ▼
+Telegram Bot
+   │
+   ▼
+Application
+   │
+   ▼
+SMTP
+   │
+   ▼
+Email Recipient
+```
+
+An example Nginx configuration is included:
+
+```text
+nginx.conf.example
+```
+
+For production, configure HTTPS using a valid TLS certificate.
 
 ---
 
 # 🔐 Security
 
-Do not publish or commit:
+Never publish or commit:
 
 ```text
 .env
@@ -283,41 +484,16 @@ Admin passwords
 
 The repository includes a `.gitignore` configured to exclude sensitive runtime files.
 
-If a Telegram bot token or SMTP credential is accidentally exposed, revoke/rotate it immediately.
+If a Telegram bot token or SMTP credential is accidentally exposed, revoke or rotate it immediately.
 
----
+Use a strong:
 
-# 🌐 Nginx
-
-An example Nginx configuration is included:
-
-```text
-nginx.conf.example
+```env
+ADMIN_PASSWORD=
+SESSION_SECRET=
 ```
 
-The recommended architecture is:
-
-```text
-Internet
-   │
-   ▼
- Nginx
-   │
-   ▼
-FastAPI :8000
-```
-
-Telegram polling runs independently:
-
-```text
-Telegram
-   │
-   ▼
-Telegram Bot
-   │
-   ▼
-Application
-```
+and do not reuse sensitive credentials from other services.
 
 ---
 
@@ -329,12 +505,18 @@ A systemd service file is included:
 telegram-file-mail-bot.service
 ```
 
-After installation:
+The installer automatically installs and enables the service.
+
+Start:
 
 ```bash
-sudo systemctl daemon-reload
-sudo systemctl enable telegram-file-mail-bot
 sudo systemctl start telegram-file-mail-bot
+```
+
+Enable at boot:
+
+```bash
+sudo systemctl enable telegram-file-mail-bot
 ```
 
 Check status:
@@ -349,6 +531,12 @@ View logs:
 sudo journalctl -u telegram-file-mail-bot -f
 ```
 
+Restart:
+
+```bash
+sudo systemctl restart telegram-file-mail-bot
+```
+
 The service is configured to restart automatically if the application stops unexpectedly.
 
 ---
@@ -357,7 +545,7 @@ The service is configured to restart automatically if the application stops unex
 
 The project uses SQLite.
 
-The database contains application data such as:
+The database stores application data such as:
 
 * Telegram users
 * User registration information
@@ -366,7 +554,7 @@ The database contains application data such as:
 * Application settings
 * Language preference
 
-The production database should not be committed to GitHub.
+The production database should never be committed to GitHub.
 
 A new installation creates its own database.
 
@@ -403,13 +591,33 @@ Email Delivered
 
 Multiple files are attached to the same email.
 
+The maximum total file size is configurable from the administration panel.
+
 ---
 
 # 🔄 Failed Delivery
 
-If email delivery fails, the uploaded files remain available for retry according to the application's retention and cleanup settings.
+If email delivery fails, uploaded files remain available according to the application's retention and cleanup settings.
 
-Users can retry sending the email from Telegram.
+Users can retry sending the email from Telegram when supported by the application flow.
+
+---
+
+# 🧹 Pending Files
+
+Pending uploads are stored in:
+
+```text
+storage/pending_uploads/
+```
+
+The application includes cleanup and retention handling for pending files.
+
+The retention period can be configured from:
+
+```text
+Admin Panel → Settings → File Management
+```
 
 ---
 
@@ -419,19 +627,97 @@ Create a virtual environment:
 
 ```bash
 python3 -m venv venv
+```
+
+Activate it:
+
+```bash
 source venv/bin/activate
 ```
 
 Install dependencies:
 
 ```bash
-pip install -r requirements.txt
+python -m pip install -r requirements.txt
 ```
 
 Run the application:
 
 ```bash
 python app.py
+```
+
+---
+
+# 🐛 Troubleshooting
+
+## Check service status
+
+```bash
+systemctl status telegram-file-mail-bot --no-pager
+```
+
+## View application logs
+
+```bash
+journalctl -u telegram-file-mail-bot -n 100 --no-pager
+```
+
+## Restart the service
+
+```bash
+systemctl restart telegram-file-mail-bot
+```
+
+## Check Python version
+
+```bash
+python3 --version
+```
+
+Python 3.11 or newer is required.
+
+## Check dependencies
+
+```bash
+/opt/telegram-file-mail-bot/venv/bin/python -m pip install \
+    -r /opt/telegram-file-mail-bot/requirements.txt
+```
+
+## Check whether port 8000 is listening
+
+```bash
+ss -lntp | grep 8000
+```
+
+Expected production binding:
+
+```text
+127.0.0.1:8000
+```
+
+For temporary direct testing:
+
+```text
+0.0.0.0:8880
+```
+
+## Check systemd service configuration
+
+```bash
+systemctl cat telegram-file-mail-bot
+```
+
+## Check environment file permissions
+
+```bash
+ls -l /opt/telegram-file-mail-bot/.env
+```
+
+Expected:
+
+```text
+-rw------- ... .env
 ```
 
 ---
@@ -446,44 +732,10 @@ Typical production files include:
 .env
 bot.db
 storage/pending_uploads/
+venv/
 ```
 
 These files are intentionally excluded from Git.
-
----
-
-# 🐛 Troubleshooting
-
-### Check service status
-
-```bash
-systemctl status telegram-file-mail-bot
-```
-
-### View application logs
-
-```bash
-journalctl -u telegram-file-mail-bot -n 100 --no-pager
-```
-
-### Restart the service
-
-```bash
-systemctl restart telegram-file-mail-bot
-```
-
-### Check Python dependencies
-
-```bash
-source venv/bin/activate
-pip install -r requirements.txt
-```
-
-### Check whether port 8000 is listening
-
-```bash
-ss -lntp | grep 8000
-```
 
 ---
 
@@ -497,7 +749,7 @@ See [`LICENSE`](LICENSE) for details.
 
 # 👨‍💻 Author
 
-Developed by **MOЯ**
+Developed by MOЯ
 
 GitHub:
 
