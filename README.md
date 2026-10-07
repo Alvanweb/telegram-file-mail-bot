@@ -2,36 +2,108 @@
 
 A modular Telegram bot that allows registered users to send multiple files to a predefined email address directly through Telegram.
 
-The project includes a FastAPI-based web administration panel, SQLite database, SMTP email delivery, user management, file history, configurable settings, and bilingual English/Persian support.
+The project includes a FastAPI-based web administration panel, SQLite database, SMTP email delivery, user management, file history, database backup and restore, configurable settings, timezone support, pagination, and bilingual English/Persian support.
 
-## ✨ Features
-
-* 📤 Send multiple files through Telegram
-* 📎 Multiple attachments in a single email
-* 📏 Configurable total file-size limit
-* 📝 Custom email subject
-* 📧 SMTP email delivery
-* 👤 Telegram user registration
-* 📱 Phone number registration
-* 🚫 Enable/disable users from the admin panel
-* 📂 File delivery history
-* 🔄 Retry failed email delivery
-* 🗑 Pending file management
-* 🖥️ FastAPI web administration panel
-* 🔐 Admin authentication
-* ⚙️ Configure application settings from the web panel
-* 🌐 English and Persian language support
-* 🇬🇧 English is the default language
-* 🇮🇷 Persian with RTL interface
-* 💾 SQLite database
-* 🚀 systemd service support
-* 🌐 Nginx reverse-proxy support
-* 🐧 Ubuntu VPS deployment
-* 🧩 Modular Python architecture
+**Current Release: `v1.0.3`**
 
 ---
 
-## 🏗️ Architecture
+## ✨ Features
+
+- 📤 Send multiple files through Telegram
+- 📎 Multiple attachments in a single email
+- 📏 Configurable total file-size limit
+- 📝 Custom email subject
+- 📧 SMTP email delivery
+- 👤 Telegram user registration
+- 📱 Phone number registration
+- 🚫 Enable/disable users from the admin panel
+- 📂 File delivery history
+- 🔄 Retry failed email delivery
+- 🗑 Pending file management
+- 📤 Support for forwarded Telegram files
+- 🖥️ FastAPI web administration panel
+- 🔐 Admin authentication
+- ⚙️ Configure application settings from the web panel
+- 🌐 English and Persian language support
+- 🇬🇧 English is the default language
+- 🇮🇷 Persian with RTL interface
+- 🕐 Configurable timezone
+- 📄 Files pagination and search
+- 💾 SQLite database
+- 💾 Database Backup & Restore
+- 📧 HTML sender information table in outgoing emails
+- 🚀 systemd service support
+- 🌐 Nginx reverse-proxy support
+- 🐧 Ubuntu VPS deployment
+- 🧩 Modular Python architecture
+
+> **Note:** PDF compression is not included in `v1.0.3`.
+
+---
+
+# 🆕 What's New in v1.0.3
+
+### 💾 Database Backup & Restore
+
+The administration panel now provides database backup and restore functionality.
+
+Administrators can create a backup of the SQLite database and restore a previously created backup when required.
+
+This is useful before upgrades, configuration changes, migrations, or maintenance.
+
+### 📄 Files Pagination & Search
+
+The Files section now supports pagination and search.
+
+This makes it easier to manage installations with a large number of uploaded files and delivery records.
+
+### 🕐 Timezone Support
+
+A configurable timezone is available from the administration panel.
+
+The selected timezone is used when displaying date and time information throughout the panel, including backup-related timestamps.
+
+### 📤 Forwarded Files
+
+Files forwarded to the Telegram bot from other chats are handled through the normal file-processing flow.
+
+Users can forward supported files without needing to download and upload them again manually.
+
+### 📧 HTML Email Information Table
+
+Outgoing emails now include sender and upload information in a structured HTML table.
+
+The table can include information such as:
+
+- User name
+- Telegram username
+- Telegram ID
+- Phone number
+- Email subject
+- Number of files
+- Total file size
+- File names
+
+The fields included in the email can be configured from the administration panel.
+
+### 🎨 Administration Panel Improvements
+
+- Improved Backup interface
+- Improved pagination card layout
+- Improved Settings interface
+- Improved bilingual UI
+- Improved RTL/LTR handling
+
+### 🗑️ PDF Compression Removed
+
+PDF compression is **not part of v1.0.3**.
+
+The bot keeps the original Telegram file-upload and File-to-Email workflow without an additional PDF compression menu or processing step.
+
+---
+
+# 🏗️ Architecture
 
 The project is organized into independent modules:
 
@@ -79,18 +151,18 @@ telegram-file-mail-bot/
 └── storage/
 ```
 
-### Main components
+## Main components
 
-| Component    | Purpose                         |
-| ------------ | ------------------------------- |
-| `bot/`       | Telegram bot logic and handlers |
-| `database/`  | SQLite database operations      |
-| `mail/`      | SMTP email delivery             |
-| `web/`       | FastAPI administration panel    |
-| `templates/` | Web UI templates                |
-| `static/`    | CSS and JavaScript              |
-| `config/`    | Application configuration       |
-| `i18n.py`    | English/Persian translations    |
+| Component | Purpose |
+|---|---|
+| `bot/` | Telegram bot logic and handlers |
+| `database/` | SQLite database operations |
+| `mail/` | SMTP email delivery |
+| `web/` | FastAPI administration panel |
+| `templates/` | Web UI templates |
+| `static/` | CSS and JavaScript |
+| `config/` | Application configuration |
+| `i18n.py` | English/Persian translations |
 
 ---
 
@@ -98,8 +170,8 @@ telegram-file-mail-bot/
 
 The application supports:
 
-* 🇬🇧 English
-* 🇮🇷 Persian
+- 🇬🇧 English
+- 🇮🇷 Persian
 
 English is the default language.
 
@@ -111,9 +183,15 @@ Admin Panel → Settings → Language
 
 The selected language is stored in the database.
 
-When Persian is selected, the web interface uses RTL layout.
+When Persian is selected:
 
-When English is selected, the web interface uses LTR layout.
+- The web interface uses RTL layout.
+- Telegram bot messages use Persian translations.
+
+When English is selected:
+
+- The web interface uses LTR layout.
+- Telegram bot messages use English translations.
 
 ---
 
@@ -123,12 +201,12 @@ When English is selected, the web interface uses LTR layout.
 
 Recommended environment:
 
-* Ubuntu 22.04 or newer
-* Python 3.11+
-* SQLite
-* Nginx for production
-* A Telegram Bot
-* An SMTP account
+- Ubuntu 22.04 or newer
+- Python 3.11+
+- SQLite
+- Nginx for production
+- A Telegram Bot
+- An SMTP account
 
 ---
 
@@ -142,7 +220,9 @@ git clone https://github.com/Alvanweb/telegram-file-mail-bot.git
 cd telegram-file-mail-bot
 ```
 
-You can also install a specific release:
+### Install a specific release
+
+To install `v1.0.3`:
 
 ```bash
 git clone --branch v1.0.3 --depth 1 \
@@ -170,20 +250,22 @@ sudo ./install.sh
 
 The installer will:
 
-* Check that it is running as root
-* Check the application files
-* Install required Ubuntu packages
-* Verify Python 3.11+
-* Create the `telegrambot` service user
-* Create the Python virtual environment
-* Install Python dependencies
-* Create runtime directories
-* Create `.env` from `.env.example`
-* Set secure file permissions
-* Install the systemd service
-* Enable the systemd service
+- Check that it is running as root
+- Check the application files
+- Install required Ubuntu packages
+- Verify Python 3.11+
+- Create the `telegrambot` service user
+- Create the Python virtual environment
+- Install Python dependencies
+- Create runtime directories
+- Create `.env` from `.env.example`
+- Set secure file permissions
+- Install the systemd service
+- Enable the systemd service
 
-### Application directory
+---
+
+## Application Directory
 
 The default application directory is:
 
@@ -193,7 +275,7 @@ The default application directory is:
 
 The installer is designed to install the application into this directory even when the repository was cloned from another location.
 
-For example, cloning from `/root` is supported:
+For example:
 
 ```bash
 cd /root
@@ -242,11 +324,11 @@ PANEL_HOST=127.0.0.1
 PANEL_PORT=8000
 ```
 
-### Important
+## Important
 
 Never commit `.env` to GitHub.
 
-The repository includes a `.gitignore` that excludes:
+The repository excludes sensitive runtime files such as:
 
 ```text
 .env
@@ -273,19 +355,52 @@ BOT_TOKEN=YOUR_TELEGRAM_BOT_TOKEN
 
 The bot uses Telegram polling and does not require a public webhook.
 
+## User flow
+
+The normal user flow is:
+
+```text
+/start
+   │
+   ▼
+User Registration
+   │
+   ▼
+Enter Email Subject
+   │
+   ▼
+Upload / Forward Files
+   │
+   ▼
+Check Total Size
+   │
+   ▼
+Review Files
+   │
+   ▼
+Send Email
+   │
+   ▼
+Email Delivered
+```
+
+Multiple files are attached to the same email.
+
+The maximum total file size is configurable from the administration panel.
+
 ---
 
 # 📧 SMTP Configuration
 
-SMTP configuration can be managed from the administration panel.
-
-Open:
+SMTP configuration can be managed from:
 
 ```text
 Admin Panel → Settings → SMTP
 ```
 
-For Gmail:
+## Gmail
+
+Recommended Gmail configuration:
 
 ```text
 SMTP Host: smtp.gmail.com
@@ -296,9 +411,9 @@ SMTP Password: Gmail App Password
 SMTP From: your@gmail.com
 ```
 
-For Gmail, use an App Password instead of your normal Google account password.
+For Gmail, use a **Google App Password** instead of your normal Google account password.
 
-The application can also be configured with other SMTP providers such as Brevo or compatible SMTP relay services.
+The application can also be configured with other compatible SMTP providers and relay services such as Brevo.
 
 ---
 
@@ -306,9 +421,7 @@ The application can also be configured with other SMTP providers such as Brevo o
 
 The application provides a FastAPI administration panel.
 
-## Default configuration
-
-The production-safe default is:
+## Default production configuration
 
 ```env
 PANEL_HOST=127.0.0.1
@@ -327,9 +440,9 @@ For production, use Nginx as a reverse proxy and expose the panel through HTTPS.
 
 ---
 
-## Temporary direct-access testing
+# 🔓 Temporary Direct Access Testing
 
-For testing without Nginx, you can temporarily change `.env`:
+For temporary testing without Nginx:
 
 ```env
 PANEL_HOST=0.0.0.0
@@ -348,11 +461,11 @@ The panel can then be accessed through:
 http://SERVER_IP:8880
 ```
 
-### Security note
+## Security Warning
 
 Do not use `0.0.0.0` as the normal production configuration unless you intentionally want the FastAPI application directly exposed.
 
-For production, use:
+For production use:
 
 ```env
 PANEL_HOST=127.0.0.1
@@ -367,11 +480,11 @@ with Nginx in front of the application.
 
 The dashboard provides:
 
-* Total users
-* Active users
-* File statistics
-* Delivery statistics
-* Application status
+- Total users
+- Active users
+- File statistics
+- Delivery statistics
+- Application status
 
 ---
 
@@ -379,13 +492,13 @@ The dashboard provides:
 
 The Users section provides:
 
-* Registered users
-* Telegram username
-* Telegram ID
-* Phone number
-* Registration information
-* Enable/disable users
-* Delete users
+- Registered users
+- Telegram username
+- Telegram ID
+- Phone number
+- Registration information
+- Enable/disable users
+- Delete users
 
 ---
 
@@ -393,13 +506,54 @@ The Users section provides:
 
 The Files section provides:
 
-* Uploaded file history
-* File names
-* File sizes
-* Email subjects
-* Delivery status
-* Error information
-* Pending file management
+- Uploaded file history
+- File names
+- File sizes
+- Email subjects
+- Delivery status
+- Error information
+- Pending file management
+- Search
+- Pagination
+
+Pagination helps manage large file histories without displaying every record on a single page.
+
+---
+
+# 💾 Database Backup & Restore
+
+The administration panel provides database backup and restore functionality.
+
+The SQLite database contains important application information including:
+
+- Telegram users
+- User registration information
+- File history
+- Pending uploads
+- Application settings
+- Language preferences
+
+Before major upgrades or migrations, it is recommended to create a database backup.
+
+> Always keep an independent backup of important production data.
+
+The production database should never be committed to GitHub.
+
+---
+
+# 🕐 Timezone
+
+The administration panel supports configurable timezone settings.
+
+The selected timezone is used for date and time information displayed by the application.
+
+This is particularly useful when the server is hosted in a different country or timezone from the administrator.
+
+Timezone settings can be managed from:
+
+```text
+Admin Panel → Settings
+```
 
 ---
 
@@ -407,13 +561,51 @@ The Files section provides:
 
 The Settings section provides:
 
-* 🌐 Language selection
-* 📧 SMTP configuration
-* 📬 Email recipients
-* 📦 Total file-size limit
-* 🧹 Pending file retention
-* 🧾 Email content fields
-* ✉️ SMTP connection testing
+- 🌐 Language selection
+- 📧 SMTP configuration
+- 📬 Email recipients
+- 📦 Total file-size limit
+- 🧹 Pending file retention
+- 🧾 Email content fields
+- 🕐 Timezone
+- ✉️ SMTP connection testing
+
+---
+
+# 📧 Email Content
+
+Outgoing emails contain information about the uploaded files and sender.
+
+The sender information is displayed in an HTML table for easier reading.
+
+Depending on the selected email fields, the message can contain:
+
+| Field | Description |
+|---|---|
+| User Name | Telegram user's first name |
+| Username | Telegram username |
+| Telegram ID | Telegram account ID |
+| Phone | Registered phone number |
+| Subject | Email subject |
+| File Count | Number of attached files |
+| Total Size | Combined file size |
+| Filenames | Names of uploaded files |
+
+The fields included in the email can be selected from:
+
+```text
+Admin Panel → Settings → Email Content
+```
+
+---
+
+# 📤 Forwarded Files
+
+The bot supports files forwarded from other Telegram chats.
+
+Users can forward supported files directly to the bot and continue through the normal file-upload process.
+
+This avoids the need to download a file and upload it again manually.
 
 ---
 
@@ -431,7 +623,7 @@ For production deployments, the recommended architecture is:
                  └─────┬─────┘
                        │
                        ▼
-              127.0.0.1:8000
+                 127.0.0.1:8000
                        │
                        ▼
                  ┌───────────┐
@@ -486,14 +678,14 @@ The repository includes a `.gitignore` configured to exclude sensitive runtime f
 
 If a Telegram bot token or SMTP credential is accidentally exposed, revoke or rotate it immediately.
 
-Use a strong:
+Use strong values for:
 
 ```env
 ADMIN_PASSWORD=
 SESSION_SECRET=
 ```
 
-and do not reuse sensitive credentials from other services.
+Do not reuse sensitive credentials from other services.
 
 ---
 
@@ -507,31 +699,31 @@ telegram-file-mail-bot.service
 
 The installer automatically installs and enables the service.
 
-Start:
+## Start
 
 ```bash
 sudo systemctl start telegram-file-mail-bot
 ```
 
-Enable at boot:
+## Enable at boot
 
 ```bash
 sudo systemctl enable telegram-file-mail-bot
 ```
 
-Check status:
+## Check status
 
 ```bash
 sudo systemctl status telegram-file-mail-bot
 ```
 
-View logs:
+## View logs
 
 ```bash
 sudo journalctl -u telegram-file-mail-bot -f
 ```
 
-Restart:
+## Restart
 
 ```bash
 sudo systemctl restart telegram-file-mail-bot
@@ -545,14 +737,14 @@ The service is configured to restart automatically if the application stops unex
 
 The project uses SQLite.
 
-The database stores application data such as:
+The database stores:
 
-* Telegram users
-* User registration information
-* File history
-* Pending uploads
-* Application settings
-* Language preference
+- Telegram users
+- User registration information
+- File history
+- Pending uploads
+- Application settings
+- Language preferences
 
 The production database should never be committed to GitHub.
 
@@ -562,7 +754,7 @@ A new installation creates its own database.
 
 # 📦 File Upload Flow
 
-The normal user flow is:
+The standard workflow is:
 
 ```text
 Start
@@ -574,7 +766,7 @@ User Registration
 Enter Email Subject
   │
   ▼
-Upload Files
+Upload / Forward Files
   │
   ▼
 Check Total Size
@@ -599,7 +791,9 @@ The maximum total file size is configurable from the administration panel.
 
 If email delivery fails, uploaded files remain available according to the application's retention and cleanup settings.
 
-Users can retry sending the email from Telegram when supported by the application flow.
+Users can retry sending the email when supported by the application flow.
+
+Delivery status and errors are available in the Files section of the administration panel.
 
 ---
 
@@ -749,7 +943,7 @@ See [`LICENSE`](LICENSE) for details.
 
 # 👨‍💻 Author
 
-Developed by MOЯ
+Developed by **MOЯ**
 
 GitHub:
 
@@ -762,3 +956,17 @@ https://github.com/Alvanweb
 If you find this project useful, consider giving it a ⭐ on GitHub.
 
 Contributions, bug reports, and feature requests are welcome.
+
+---
+
+## 📌 Release
+
+Current stable release:
+
+**v1.0.3**
+
+Release history:
+
+- `v1.0.1` — Initial public release
+- `v1.0.2` — Installation, configuration, and bilingual UI improvements
+- `v1.0.3` — Backup & Restore, Timezone, Pagination, Forwarded Files, HTML email information table, UI improvements, and removal of PDF compression
