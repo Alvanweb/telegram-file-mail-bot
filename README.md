@@ -95,12 +95,6 @@ The fields included in the email can be configured from the administration panel
 - Improved bilingual UI
 - Improved RTL/LTR handling
 
-### 🗑️ PDF Compression Removed
-
-PDF compression is **not part of v1.0.3**.
-
-The bot keeps the original Telegram file-upload and File-to-Email workflow without an additional PDF compression menu or processing step.
-
 ---
 
 # 🏗️ Architecture
