@@ -145,7 +145,7 @@ cd telegram-file-mail-bot
 You can also install a specific release:
 
 ```bash
-git clone --branch v1.0.2 --depth 1 \
+git clone --branch v1.0.3 --depth 1 \
 https://github.com/Alvanweb/telegram-file-mail-bot.git \
 telegram-file-mail-bot
 

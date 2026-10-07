@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="{{ lang }}" dir="{{ dir }}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{{ t('database_backup') }} | File Mail</title>
+<link rel="stylesheet" href="/static/style.css">
+<link rel="stylesheet" href="/static/pagination.css">
+</head>
+<body>
+<div class="app">
+<aside class="sidebar">
+<div class="brand"><div class="brand-mark">✉</div><div><strong>File Mail</strong><small>{{ t('bot_management') }}</small></div></div>
+<nav>
+<a href="/">◈ <span>{{ t('dashboard') }}</span></a>
+<a href="/users">♙ <span>{{ t('users') }}</span></a>
+<a href="/files">▣ <span>{{ t('files') }}</span></a>
+<a href="/settings">⚙ <span>{{ t('settings') }}</span></a>
+<a class="active" href="/backups">💾 <span>{{ t('database_backup') }}</span></a>
+</nav>
+<a class="logout" href="/logout">↪ <span>{{ t('logout') }}</span></a>
+</aside>
+
+<main class="main">
+<header class="topbar"><div><div class="eyebrow">{{ t('configuration') }}</div><h1>{{ t('database_backup') }}</h1><p class="muted">{{ t('database_backup_hint') }}</p></div></header>
+{% if message %}<div class="notice success-notice">{{ message }}</div>{% endif %}
+{% if error %}<div class="notice error-notice">{{ error }}</div>{% endif %}
+
+<section class="panel settings-panel">
+<div class="panel-head"><h2>💾 {{ t('database_backup') }}</h2><p>{{ t('backup_warning') }}</p></div>
+<div class="backup-toolbar"><div class="timezone-current">🌐 {{ t('timezone') }}: <strong>{{ timezone }}</strong></div><form method="post" action="/backups/create"><button class="btn primary" type="submit">💾 {{ t('create_backup') }}</button></form></div>
+</section>
+
+<section class="panel settings-panel">
+<div class="panel-head"><h2>♻️ {{ t('restore_database') }}</h2></div>
+<form method="post" action="/backups/restore" enctype="multipart/form-data" onsubmit="return confirm('{{ t('confirm_restore') }}')">
+<div class="settings-grid"><label class="full">{{ t('backup_file') }}<input type="file" name="backup" accept=".db" required></label></div>
+<div class="settings-actions"><button class="btn warning-btn" type="submit">♻️ {{ t('restore_database') }}</button></div>
+</form>
+</section>
+
+<section class="panel">
+<div class="panel-head"><h2>📦 {{ t('available_backups') }}</h2></div>
+<div class="table-wrap"><table><thead><tr><th>{{ t('filename') }}</th><th>{{ t('size') }}</th><th>{{ t('time') }}</th><th>{{ t('actions') }}</th></tr></thead>
+<tbody>{% for backup in backups %}<tr><td class="mono">{{ backup.name }}</td><td class="mono">{{ '%.2f'|format(backup.size / 1024 / 1024) }} MB</td><td class="muted">{{ backup.time }}</td><td><div class="actions"><a class="btn small" href="/backups/download/{{ backup.name }}">⬇️ {{ t('download') }}</a><form method="post" action="/backups/delete/{{ backup.name }}" onsubmit="return confirm('{{ t('confirm_delete_backup') }}')"><button class="btn small danger-btn" type="submit">🗑 {{ t('delete') }}</button></form></div></td></tr>{% else %}<tr><td colspan="4" class="empty">{{ t('no_backups') }}</td></tr>{% endfor %}</tbody></table></div>
+</section>
+</main>
+</div>
+</body>
+</html>

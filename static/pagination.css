@@ -1,0 +1,78 @@
+/* File pagination */
+.pagination-box {
+    margin-top: 20px;
+    padding: 14px 16px;
+    border: 1px solid #dbe3ee;
+    border-radius: 14px;
+    background: #f8fafc;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    flex-wrap: wrap;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, .04);
+}
+.pagination-summary {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    color: #475569;
+    font-size: 14px;
+}
+.pagination-summary strong { color: #1e293b; }
+.pagination-total { color: #94a3b8; }
+.pagination-links {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+.page-link,
+.page-current,
+.page-nav,
+.page-dots {
+    min-width: 36px;
+    height: 36px;
+    padding: 0 10px;
+    box-sizing: border-box;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 9px;
+    font-size: 13px;
+    text-decoration: none;
+}
+.page-link,
+.page-nav {
+    border: 1px solid #d7e0eb;
+    background: #fff;
+    color: #334155;
+    transition: .15s ease;
+}
+.page-link:hover,
+.page-nav:hover {
+    border-color: #94a3b8;
+    background: #f1f5f9;
+}
+.page-current {
+    background: #2563eb;
+    border: 1px solid #2563eb;
+    color: #fff;
+    font-weight: 700;
+}
+.page-dots { color: #64748b; min-width: 22px; padding: 0; }
+.timezone-current { color:#475569; font-size:14px; }
+@media(max-width:700px) {
+    .pagination-box { align-items: stretch; }
+    .pagination-summary { justify-content: center; width: 100%; }
+    .pagination-links { width: 100%; }
+}
+html[dir="rtl"] .pagination-box { direction: rtl; }
+html[dir="ltr"] .pagination-box { direction: ltr; }
+
+.backup-toolbar{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:18px;width:100%;box-sizing:border-box;padding:16px;border:1px solid #dbe3ee;border-radius:14px;background:#f8fafc;}
+.backup-toolbar form{margin:0;width:auto;}
+.backup-toolbar .btn{white-space:nowrap;min-width:150px;}
+@media(max-width:700px){.backup-toolbar{grid-template-columns:1fr}.backup-toolbar form,.backup-toolbar .btn{width:100%}}
+html[dir="rtl"] .backup-toolbar{direction:rtl}html[dir="ltr"] .backup-toolbar{direction:ltr}
