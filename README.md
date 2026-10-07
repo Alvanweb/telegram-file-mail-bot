@@ -317,24 +317,6 @@ DB_PATH=/opt/telegram-file-mail-bot/bot.db
 PANEL_HOST=127.0.0.1
 PANEL_PORT=8000
 ```
-
-## Important
-
-Never commit `.env` to GitHub.
-
-The repository excludes sensitive runtime files such as:
-
-```text
-.env
-*.db
-*.sqlite
-*.sqlite3
-venv/
-.venv/
-__pycache__/
-*.log
-```
-
 ---
 
 # 🤖 Telegram Bot
